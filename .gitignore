@@ -1,1 +1,7 @@
-wire.toolbox
+states/
+*.out
+*.tlaps
+**/*.toolbox/*/
+**/*.toolbox/*___*_SnapShot_*.launch
+**/*.toolbox/.project
+**/*.toolbox/.settings/

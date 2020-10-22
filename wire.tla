@@ -5,63 +5,80 @@ EXTENDS Integers
     variables
         people = {"alice", "bob"},
         acc = [p \in people |-> 5],
-        sender = "alice",
-        receiver = "bob",
-        amount \in 1..acc[sender];
         
 define
     NoOverdrafts == \A p \in people: acc[p] >= 0
+    EventuallyConsistent == <>[](acc["alice"] + acc["bob"] = 10)
 end define;
 
+process Wire \in 1..2
+    variables
+        sender = "alice",
+        receiver = "bob",
+        amount \in 1..acc[sender];
 
 begin
-    Withdraw:
-        acc[sender] := acc[sender] - amount;
-    Deposit:
-        acc[receiver] := acc[receiver] + amount;
+    CheckFunds:
+        if amount <= acc[sender] then
+                acc[sender] := acc[sender] - amount;
+            Deposit:
+                acc[receiver] := acc[receiver] + amount;
+        end if;
+end process;
 end algorithm;*)
 
 
-\* BEGIN TRANSLATION - the hash of the PCal code: PCal-605fa74deafda7b3c8f3567c8e535957
-VARIABLES people, acc, sender, receiver, amount, pc
+\* BEGIN TRANSLATION - the hash of the PCal code: PCal-abed4595ab5f660e99e6373a12aec987
+VARIABLES people, acc, pc
 
 (* define statement *)
 NoOverdrafts == \A p \in people: acc[p] >= 0
+EventuallyConsistent == <>[](acc["alice"] + acc["bob"] = 10)
 
+VARIABLES sender, receiver, amount
 
-vars == << people, acc, sender, receiver, amount, pc >>
+vars == << people, acc, pc, sender, receiver, amount >>
+
+ProcSet == (1..2)
 
 Init == (* Global variables *)
         /\ people = {"alice", "bob"}
         /\ acc = [p \in people |-> 5]
-        /\ sender = "alice"
-        /\ receiver = "bob"
-        /\ amount \in 1..acc[sender]
-        /\ pc = "Withdraw"
+        (* Process Wire *)
+        /\ sender = [self \in 1..2 |-> "alice"]
+        /\ receiver = [self \in 1..2 |-> "bob"]
+        /\ amount \in [1..2 -> 1..acc[sender[CHOOSE self \in  1..2 : TRUE]]]
+        /\ pc = [self \in ProcSet |-> "CheckFunds"]
 
-Withdraw == /\ pc = "Withdraw"
-            /\ acc' = [acc EXCEPT ![sender] = acc[sender] - amount]
-            /\ pc' = "Deposit"
-            /\ UNCHANGED << people, sender, receiver, amount >>
+CheckFunds(self) == /\ pc[self] = "CheckFunds"
+                    /\ IF amount[self] <= acc[sender[self]]
+                          THEN /\ acc' = [acc EXCEPT ![sender[self]] = acc[sender[self]] - amount[self]]
+                               /\ pc' = [pc EXCEPT ![self] = "Deposit"]
+                          ELSE /\ pc' = [pc EXCEPT ![self] = "Done"]
+                               /\ acc' = acc
+                    /\ UNCHANGED << people, sender, receiver, amount >>
 
-Deposit == /\ pc = "Deposit"
-           /\ acc' = [acc EXCEPT ![receiver] = acc[receiver] + amount]
-           /\ pc' = "Done"
-           /\ UNCHANGED << people, sender, receiver, amount >>
+Deposit(self) == /\ pc[self] = "Deposit"
+                 /\ acc' = [acc EXCEPT ![receiver[self]] = acc[receiver[self]] + amount[self]]
+                 /\ pc' = [pc EXCEPT ![self] = "Done"]
+                 /\ UNCHANGED << people, sender, receiver, amount >>
+
+Wire(self) == CheckFunds(self) \/ Deposit(self)
 
 (* Allow infinite stuttering to prevent deadlock on termination. *)
-Terminating == pc = "Done" /\ UNCHANGED vars
+Terminating == /\ \A self \in ProcSet: pc[self] = "Done"
+               /\ UNCHANGED vars
 
-Next == Withdraw \/ Deposit
+Next == (\E self \in 1..2: Wire(self))
            \/ Terminating
 
 Spec == Init /\ [][Next]_vars
 
-Termination == <>(pc = "Done")
+Termination == <>(\A self \in ProcSet: pc[self] = "Done")
 
-\* END TRANSLATION - the hash of the generated TLA code (remove to silence divergence warnings): TLA-c7e8d0cd79370ddf52496be81b058fde
+\* END TRANSLATION - the hash of the generated TLA code (remove to silence divergence warnings): TLA-a22177ae73e0dc9f1f587ff0d2ef90ea
 
 =============================================================================
 \* Modification History
-\* Last modified Wed Oct 21 23:40:24 CST 2020 by ming
+\* Last modified Thu Oct 22 10:03:19 CST 2020 by ming
 \* Created Wed Oct 21 23:06:20 CST 2020 by ming
