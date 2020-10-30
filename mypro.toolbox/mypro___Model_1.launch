@@ -5,28 +5,26 @@
     <stringAttribute key="distributedNetworkInterface" value="172.23.44.248"/>
     <intAttribute key="distributedNodesCount" value="1"/>
     <stringAttribute key="distributedTLC" value="off"/>
-    <intAttribute key="fpIndex" value="0"/>
+    <intAttribute key="fpIndex" value="105"/>
     <intAttribute key="maxHeapSize" value="25"/>
     <stringAttribute key="modelBehaviorInit" value=""/>
     <stringAttribute key="modelBehaviorNext" value=""/>
     <stringAttribute key="modelBehaviorSpec" value="Spec"/>
     <intAttribute key="modelBehaviorSpecType" value="1"/>
-    <stringAttribute key="modelBehaviorVars" value="people, sender, receiver, acc, amount, pc"/>
+    <stringAttribute key="modelBehaviorVars" value="current_message, queue"/>
     <stringAttribute key="modelComments" value=""/>
     <booleanAttribute key="modelCorrectnessCheckDeadlock" value="true"/>
     <listAttribute key="modelCorrectnessInvariants">
-        <listEntry value="1NoOverdrafts"/>
+        <listEntry value="1BoundedQueue"/>
     </listAttribute>
-    <listAttribute key="modelCorrectnessProperties">
-        <listEntry value="0Termination"/>
-        <listEntry value="1EventuallyConsistent"/>
-    </listAttribute>
+    <listAttribute key="modelCorrectnessProperties"/>
     <intAttribute key="modelEditorOpenTabs" value="8"/>
-    <stringAttribute key="modelExpressionEval" value="1 + 2"/>
-    <listAttribute key="modelParameterConstants"/>
+    <listAttribute key="modelParameterConstants">
+        <listEntry value="MaxQueueSize;;2;0;0"/>
+    </listAttribute>
     <intAttribute key="modelVersion" value="20191005"/>
     <intAttribute key="numberOfWorkers" value="4"/>
     <stringAttribute key="result.mail.address" value=""/>
-    <stringAttribute key="specName" value="wire"/>
+    <stringAttribute key="specName" value="mypro"/>
     <stringAttribute key="tlcResourcesProfile" value="local custom"/>
 </launchConfiguration>
